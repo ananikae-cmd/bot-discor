@@ -1,0 +1,60 @@
+const express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("Bot activo y funcionando ✅");
+});
+
+app.listen(3000, () => {
+  console.log("Servidor web encendido en puerto 3000");
+});
+
+const { Client, GatewayIntentBits, Partials } = require("discord.js");
+
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
+});
+
+// ⚠️ Cambia esto por el ID del canal de logs
+const LOG_CHANNEL_ID = "1449769436969046137";
+
+// Usamos clientReady en vez de ready (para evitar la advertencia)
+client.once("clientReady", () => {
+  console.log(`✅ Bot conectado como ${client.user.tag}`);
+});
+
+// 🗑️ Mensajes eliminados
+client.on("messageDelete", (message) => {
+  const logChannel = message.guild.channels.cache.get(LOG_CHANNEL_ID);
+  if (logChannel) {
+    logChannel.send(
+      `🗑️ Mensaje eliminado en #${message.channel?.name} por ${
+        message.author?.tag || "desconocido"
+      }:\n${message.content || "(sin contenido)"}`
+    );
+  }
+});
+
+// ✏️ Mensajes editados
+client.on("messageUpdate", (oldMessage, newMessage) => {
+  if (oldMessage.content === newMessage.content) return;
+  const logChannel = newMessage.guild.channels.cache.get(LOG_CHANNEL_ID);
+  if (logChannel) {
+    logChannel.send(
+      `✏️ Mensaje editado en #${newMessage.channel?.name} por ${
+        newMessage.author?.tag || "desconocido"
+      }:\nAntes: ${oldMessage.content || "(sin contenido)"}\nDespués: ${
+        newMessage.content || "(sin contenido)"
+      }`
+    );
+  }
+});
+
+client.login(
+  "TOKEN"
+);
