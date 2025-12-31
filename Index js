@@ -56,5 +56,5 @@ client.on("messageUpdate", (oldMessage, newMessage) => {
 });
 
 client.login(
-  "TOKEN"
+  "process.env.TOKEN"
 );
